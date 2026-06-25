@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SISTEMA HARDWARE - PROTOCOLO MAESTRO V.3</title>
+    <title>SISTEMA HARDWARE - PROTOCOLO SONORO V.4</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
@@ -128,44 +128,39 @@
 
     <div class="boss-area">
         <div class="p0nch0" id="boss-sprite"><div class="mouth"></div></div>
-        <div class="bubble" id="boss-talk">SISTEMA ONLINE.</div>
+        <div class="bubble" id="boss-talk">AUDIO CARGADO.</div>
     </div>
 
     <div class="content-area" id="screen-main">
-        <!-- INICIO -->
         <div id="start-ui" style="text-align: center;">
-            <h1 style="font-family: var(--pixel-font); font-size: 14px; color: var(--orange); margin: 10px 0 15px;">PROTOCOLO HARDWARE</h1>
+            <h1 style="font-family: var(--pixel-font); font-size: 14px; color: var(--orange); margin: 10px 0 15px;">PROTOCOLO SONORO</h1>
             
             <div class="instruction-box">
                 <b>MANUAL DE OPERACIONES:</b><br><br>
-                1. Responderás 25 preguntas aleatorias.<br>
-                2. Si aciertas, P0NCH-0 puede <b>bloquearte</b> con un minijuego.<br>
-                3. Ganar el minijuego te <b>cura 1 corazón</b>.<br>
-                4. Perder el minijuego te <b>quita 1 corazón</b>.<br>
-                5. <b>ALERTA:</b> El tiempo que pases luchando se restará de tu siguiente pregunta.<br><br>
-                <b>APROBACIÓN:</b> 18 aciertos (70%) y terminar con vida.
+                1. 25 preguntas aleatorias.<br>
+                2. Si aciertas, P0NCH-0 puede <b>atacarte</b>.<br>
+                3. Ganar la batalla <b>cura 1 HP</b>.<br>
+                4. Perder te <b>daña y roba tiempo</b>.<br><br>
+                <b>REQUISITO:</b> 70% (18/25) y HP > 0.
             </div>
 
-            <button class="option-btn" onclick="startGame()" style="text-align: center;">[ INICIAR REVISIÓN ]</button>
+            <button class="option-btn" onclick="startGame()" style="text-align: center;">[ INICIAR PROTOCOLO ]</button>
         </div>
 
-        <!-- QUIZ -->
         <div id="quiz-ui" style="display: none;">
             <div style="font-family: var(--pixel-font); font-size: 7px; color: #666; margin-bottom: 10px; text-align: center;" id="q-idx-label">PREGUNTA 00/25</div>
             <div id="q-txt" class="q-text"></div>
             <div id="q-options"></div>
         </div>
 
-        <!-- RESULTADOS -->
         <div id="result-ui" style="display: none; text-align: center;">
             <h2 id="final-status" style="font-family: var(--pixel-font); font-size: 12px;"></h2>
             <div id="final-stats" style="font-family: var(--pixel-font); font-size: 8px; margin: 20px 0; line-height: 1.8;"></div>
-            <input type="text" id="user-name" placeholder="NOMBRE DEL TÉCNICO" style="width:100%; padding:15px; background:black; color:white; border:1px solid white; font-family: var(--pixel-font); font-size: 8px; margin-bottom: 15px;">
+            <input type="text" id="user-name" placeholder="IDENTIFICACIÓN" style="width:100%; padding:15px; background:black; color:white; border:1px solid white; font-family: var(--pixel-font); font-size: 8px; margin-bottom: 15px;">
             <button class="option-btn" onclick="sendWhatsApp()" style="text-align: center;">[ TRANSMITIR REPORTE ]</button>
         </div>
     </div>
 
-    <!-- Modales -->
     <div id="feedback-overlay" class="overlay">
         <h2 id="fb-title" class="feedback-title"></h2>
         <p id="fb-body" class="feedback-body"></p>
@@ -181,6 +176,20 @@
 </div>
 
 <script>
+    // --- SISTEMA DE SONIDOS ---
+    const sounds = {
+        correct: new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3'),
+        wrong: new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3'),
+        click: new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3'),
+        heal: new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'),
+        alert: new Audio('https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3')
+    };
+
+    function playSound(key) {
+        sounds[key].currentTime = 0;
+        sounds[key].play().catch(e => console.log("Audio bloqueado"));
+    }
+
     const baseQuestions = [
         { q: "¿Componente del filtrado transitorio que corta picos?", o: ["Varistor", "Diodo", "Transformador", "Transistor"], a: "Varistor", e: "El varistor corta los picos de tensión recibidos del suministro." },
         { q: "¿Qué etapa transforma CA en CC?", o: ["Rectificación", "Conmutación", "Filtrado", "Regulación"], a: "Rectificación", e: "Utiliza diodos para enderezar la onda sinusoidal." },
@@ -228,6 +237,7 @@
     }
 
     function startGame() {
+        playSound('click');
         shuffledQuestions = shuffle([...baseQuestions]).map(q => ({
             ...q, o: shuffle([...q.o]), userCorrect: null
         }));
@@ -266,7 +276,7 @@
             const b = document.createElement('button');
             b.className = 'option-btn';
             b.innerText = `> ${opt}`;
-            b.onclick = () => checkAnswer(opt);
+            b.onclick = () => { playSound('click'); checkAnswer(opt); };
             opts.appendChild(b);
         });
     }
@@ -275,11 +285,13 @@
         const q = shuffledQuestions[currentIdx];
         active = false;
         if (selected === q.a) {
+            playSound('correct');
             q.userCorrect = true;
             score++;
             if (Math.random() > 0.6) launchBattle();
             else nextQuestion();
         } else {
+            playSound('wrong');
             q.userCorrect = false;
             damage(1, "¡ERROR!");
             showFeedback(q);
@@ -294,18 +306,20 @@
     }
 
     function closeFeedback() {
+        playSound('click');
         document.getElementById('feedback-overlay').style.display = 'none';
         nextQuestion();
     }
 
     function damage(n, msg) {
+        playSound('wrong');
         hp -= n;
         updateHP();
         document.getElementById('boss-talk').innerText = msg;
         document.getElementById('game-viewport').classList.add('shake');
         setTimeout(() => document.getElementById('game-viewport').classList.remove('shake'), 300);
         if (hp <= 0) {
-            alert("INTEGRIDAD DE SISTEMA: 0%. REINICIANDO PROTOCOLO...");
+            alert("SISTEMA DESTRUIDO.");
             location.reload();
         }
     }
@@ -330,6 +344,7 @@
 
     // --- BATALLA ---
     function launchBattle() {
+        playSound('alert');
         miniGameStartTime = Date.now();
         const diff = currentIdx < 8 ? 1 : (currentIdx < 16 ? 2 : 3);
         const overlay = document.getElementById('game-overlay');
@@ -347,13 +362,15 @@
     function endBattle(win) {
         penalty = Math.floor((Date.now() - miniGameStartTime) / 1000);
         document.getElementById('game-overlay').style.display = 'none';
-        if (!win) damage(1, "¡DÉBIL!");
-        else {
+        if (!win) {
+            damage(1, "¡DÉBIL!");
+        } else {
+            playSound('heal');
             if (hp < 10) {
                 hp++; updateHP();
                 showSplash("¡HP RECUPERADO!", "#00ff00");
             } else {
-                showSplash("¡SISTEMA ÓPTIMO!", "#00ff00");
+                showSplash("¡SISTEMA OK!", "#00ff00");
             }
         }
         nextQuestion();
@@ -402,7 +419,7 @@
             grid.innerHTML = '';
             board.forEach((v, i) => {
                 const c = document.createElement('div'); c.className = 'ttt-cell'; c.innerText = v;
-                c.onclick = () => { if (board[i] === "") { board[i] = "X"; if (checkWin("X")) endBattle(true); else if (!board.includes("")) endBattle(true); else setTimeout(cpu, 200); } };
+                c.onclick = () => { playSound('click'); if (board[i] === "") { board[i] = "X"; if (checkWin("X")) endBattle(true); else if (!board.includes("")) endBattle(true); else setTimeout(cpu, 200); } };
                 grid.appendChild(c);
             });
         };
@@ -416,13 +433,13 @@
     }
 
     function startMash(container, diff) {
-        container.innerHTML = `<div style="font-family:var(--pixel-font);font-size:7px;margin-bottom:10px">¡MASH (PULSA RÁPIDO)!</div>
+        container.innerHTML = `<div style="font-family:var(--pixel-font);font-size:7px;margin-bottom:10px">¡ESTABILIZA SEÑAL!</div>
                                <div class="mash-bar"><div id="mash-fill"></div></div>
                                <button class="option-btn" id="mash-btn" style="text-align:center">PULSAR!!</button>`;
         let val = 50;
         const fill = document.getElementById('mash-fill');
         const dec = setInterval(() => { val -= (diff * 1.5); fill.style.width = val + '%'; if(val <= 0) { clearInterval(dec); endBattle(false); } }, 100);
-        document.getElementById('mash-btn').onpointerdown = () => { val += 7; if(val >= 100) { clearInterval(dec); endBattle(true); } };
+        document.getElementById('mash-btn').onpointerdown = () => { playSound('click'); val += 7; if(val >= 100) { clearInterval(dec); endBattle(true); } };
     }
 
     function finish() {
@@ -431,26 +448,21 @@
         document.getElementById('result-ui').style.display = 'block';
         const win = score >= 18 && hp > 0;
         const status = document.getElementById('final-status');
-        status.innerText = win ? "SISTEMA ESTABLE (APROBADO)" : "SISTEMA CORRUPTO (REPROBADO)";
+        status.innerText = win ? "SISTEMA ESTABLE (APROBADO)" : "SISTEMA CORRUPTO (FALLIDO)";
         status.style.color = win ? "#00ff00" : "#ff0033";
-        document.getElementById('final-stats').innerHTML = `
-            ACIERTOS: ${score}/25<br>
-            HP FINAL: ${hp}/10<br>
-            CONDICIÓN: ${win ? 'ÓPTIMA' : 'RECHAZADA'}
-        `;
+        document.getElementById('final-stats').innerHTML = `ACIERTOS: ${score}/25<br>HP FINAL: ${hp}/10`;
     }
 
     function sendWhatsApp() {
-        const name = document.getElementById('user-name').value || "Tecnico_Anonimo";
+        playSound('click');
+        const name = document.getElementById('user-name').value || "Tecnico";
         const result = (score >= 18 && hp > 0) ? "APROBADO" : "REPROBADO";
-        
         let report = "";
         shuffledQuestions.forEach((q, i) => {
             const textResult = q.userCorrect ? "CORRECTA" : "INCORRECTA";
             report += `${i + 1}. ${textResult}%0A`;
         });
-
-        const text = `*EXAMEN HARDWARE - REPORTE*%0A*Técnico:* ${name}%0A*Nota:* ${score}/25%0A*HP Final:* ${hp}/10%0A*Resultado:* ${result}%0A%0A*DETALLE DE RESPUESTAS:*%0A${report}`;
+        const text = `*EXAMEN HARDWARE*%0A*Técnico:* ${name}%0A*Nota:* ${score}/25%0A*HP Final:* ${hp}/10%0A*Resultado:* ${result}%0A%0A*DETALLE:*%0A${report}`;
         window.open(`https://wa.me/543816490060?text=${text}`);
     }
 </script>
