@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SISTEMA HARDWARE - PROTOCOLO MAESTRO</title>
+    <title>SISTEMA HARDWARE - PROTOCOLO MAESTRO V.3</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
@@ -76,6 +76,9 @@
         }
 
         .content-area { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; }
+        .instruction-box { background: #111; border: 1px solid #333; padding: 10px; font-size: 9px; line-height: 1.4; margin-bottom: 15px; text-align: left; }
+        .instruction-box b { color: var(--orange); }
+
         .q-text { font-size: 0.9rem; font-weight: bold; margin-bottom: 15px; text-align: center; color: #ffcc00; }
         
         .option-btn {
@@ -129,22 +132,31 @@
     </div>
 
     <div class="content-area" id="screen-main">
-        <div id="start-ui" style="text-align: center; margin-top: 30px;">
-            <h1 style="font-family: var(--pixel-font); font-size: 14px; color: var(--orange); margin-bottom: 20px;">PROTOCOLO MAESTRO</h1>
-            <p style="font-size: 10px; line-height: 1.8; margin-bottom: 25px;">
-                25 Preguntas Técnicas.<br>
-                Gana minijuegos para curar HP.<br>
-                Reporte detallado al finalizar.
-            </p>
+        <!-- INICIO -->
+        <div id="start-ui" style="text-align: center;">
+            <h1 style="font-family: var(--pixel-font); font-size: 14px; color: var(--orange); margin: 10px 0 15px;">PROTOCOLO HARDWARE</h1>
+            
+            <div class="instruction-box">
+                <b>MANUAL DE OPERACIONES:</b><br><br>
+                1. Responderás 25 preguntas aleatorias.<br>
+                2. Si aciertas, P0NCH-0 puede <b>bloquearte</b> con un minijuego.<br>
+                3. Ganar el minijuego te <b>cura 1 corazón</b>.<br>
+                4. Perder el minijuego te <b>quita 1 corazón</b>.<br>
+                5. <b>ALERTA:</b> El tiempo que pases luchando se restará de tu siguiente pregunta.<br><br>
+                <b>APROBACIÓN:</b> 18 aciertos (70%) y terminar con vida.
+            </div>
+
             <button class="option-btn" onclick="startGame()" style="text-align: center;">[ INICIAR REVISIÓN ]</button>
         </div>
 
+        <!-- QUIZ -->
         <div id="quiz-ui" style="display: none;">
             <div style="font-family: var(--pixel-font); font-size: 7px; color: #666; margin-bottom: 10px; text-align: center;" id="q-idx-label">PREGUNTA 00/25</div>
             <div id="q-txt" class="q-text"></div>
             <div id="q-options"></div>
         </div>
 
+        <!-- RESULTADOS -->
         <div id="result-ui" style="display: none; text-align: center;">
             <h2 id="final-status" style="font-family: var(--pixel-font); font-size: 12px;"></h2>
             <div id="final-stats" style="font-family: var(--pixel-font); font-size: 8px; margin: 20px 0; line-height: 1.8;"></div>
@@ -222,8 +234,7 @@
         document.getElementById('start-ui').style.display = 'none';
         document.getElementById('quiz-ui').style.display = 'block';
         hp = 10; score = 0; currentIdx = 0;
-        updateHP();
-        loadQuestion();
+        updateHP(); loadQuestion();
         active = true;
         if (timerId) clearInterval(timerId);
         timerId = setInterval(tick, 100);
@@ -277,7 +288,7 @@
 
     function showFeedback(q) {
         const fb = document.getElementById('feedback-overlay');
-        document.getElementById('fb-title').innerText = "¡FALLO!";
+        document.getElementById('fb-title').innerText = "¡FALLO TÉCNICO!";
         document.getElementById('fb-body').innerText = q.e;
         fb.style.display = 'flex';
     }
@@ -294,7 +305,7 @@
         document.getElementById('game-viewport').classList.add('shake');
         setTimeout(() => document.getElementById('game-viewport').classList.remove('shake'), 300);
         if (hp <= 0) {
-            alert("SISTEMA DESTRUIDO. REINICIANDO...");
+            alert("INTEGRIDAD DE SISTEMA: 0%. REINICIANDO PROTOCOLO...");
             location.reload();
         }
     }
@@ -336,14 +347,13 @@
     function endBattle(win) {
         penalty = Math.floor((Date.now() - miniGameStartTime) / 1000);
         document.getElementById('game-overlay').style.display = 'none';
-        if (!win) damage(1, "¡FRÁGIL!");
+        if (!win) damage(1, "¡DÉBIL!");
         else {
             if (hp < 10) {
-                hp++;
-                updateHP();
+                hp++; updateHP();
                 showSplash("¡HP RECUPERADO!", "#00ff00");
             } else {
-                showSplash("¡SISTEMA OK!", "#00ff00");
+                showSplash("¡SISTEMA ÓPTIMO!", "#00ff00");
             }
         }
         nextQuestion();
@@ -406,7 +416,7 @@
     }
 
     function startMash(container, diff) {
-        container.innerHTML = `<div style="font-family:var(--pixel-font);font-size:7px;margin-bottom:10px">¡ESTABILIZA SEÑAL!</div>
+        container.innerHTML = `<div style="font-family:var(--pixel-font);font-size:7px;margin-bottom:10px">¡MASH (PULSA RÁPIDO)!</div>
                                <div class="mash-bar"><div id="mash-fill"></div></div>
                                <button class="option-btn" id="mash-btn" style="text-align:center">PULSAR!!</button>`;
         let val = 50;
@@ -419,24 +429,28 @@
         active = false; clearInterval(timerId);
         document.getElementById('quiz-ui').style.display = 'none';
         document.getElementById('result-ui').style.display = 'block';
-        const win = score >= 18;
+        const win = score >= 18 && hp > 0;
         const status = document.getElementById('final-status');
-        status.innerText = win ? "SISTEMA ESTABLE (APROBADO)" : "SISTEMA CORRUPTO (FALLIDO)";
+        status.innerText = win ? "SISTEMA ESTABLE (APROBADO)" : "SISTEMA CORRUPTO (REPROBADO)";
         status.style.color = win ? "#00ff00" : "#ff0033";
-        document.getElementById('final-stats').innerHTML = `ACIERTOS: ${score}/25<br>HP FINAL: ${hp}/10`;
+        document.getElementById('final-stats').innerHTML = `
+            ACIERTOS: ${score}/25<br>
+            HP FINAL: ${hp}/10<br>
+            CONDICIÓN: ${win ? 'ÓPTIMA' : 'RECHAZADA'}
+        `;
     }
 
     function sendWhatsApp() {
-        const name = document.getElementById('user-name').value || "Técnico";
-        const result = score >= 18 ? "APROBADO" : "REPROBADO";
+        const name = document.getElementById('user-name').value || "Tecnico_Anonimo";
+        const result = (score >= 18 && hp > 0) ? "APROBADO" : "REPROBADO";
         
         let report = "";
         shuffledQuestions.forEach((q, i) => {
-            const icon = q.userCorrect ? "✅" : "❌";
-            report += `${i + 1}. ${icon}%0A`;
+            const textResult = q.userCorrect ? "CORRECTA" : "INCORRECTA";
+            report += `${i + 1}. ${textResult}%0A`;
         });
 
-        const text = `*EXAMEN HARDWARE*%0A*Alumno:* ${name}%0A*Nota:* ${score}/25%0A*HP:* ${hp}%0A*Estado:* ${result}%0A%0A*DETALLE:*%0A${report}`;
+        const text = `*EXAMEN HARDWARE - REPORTE*%0A*Técnico:* ${name}%0A*Nota:* ${score}/25%0A*HP Final:* ${hp}/10%0A*Resultado:* ${result}%0A%0A*DETALLE DE RESPUESTAS:*%0A${report}`;
         window.open(`https://wa.me/543816490060?text=${text}`);
     }
 </script>
