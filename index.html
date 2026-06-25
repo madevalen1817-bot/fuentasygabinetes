@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Examen Hardware - Protocolo de Castigo P0NCH-0</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --orange: #ff6600;
+            --black: #000000;
+            --white: #ffffff;
+            --pixel-font: 'Press Start 2P', cursive;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
+
+        body {
+            background-color: #111;
+            color: var(--white);
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+
+        #game-viewport {
+            width: 100%;
+            max-width: 500px;
+            height: 100%;
+            background: var(--black);
+            border: 2px solid #333;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        header {
+            padding: 10px;
+            border-bottom: 2px solid var(--white);
+            font-family: var(--pixel-font);
+            font-size: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hp-bar { color: #ff0000; display: flex; gap: 2px; flex-wrap: wrap; max-width: 60%; }
+        .timer-box { color: var(--orange); font-size: 11px; }
+
+        .boss-container {
+            height: 130px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(0deg, #000 0%, #1a0a00 100%);
+            position: relative;
+        }
+
+        .p0nch0 {
+            width: 50px; height: 50px;
+            border: 3px solid var(--white);
+            position: relative;
+            animation: float 2s infinite ease-in-out;
+        }
+        .p0nch0::before, .p0nch0::after { 
+            content: ''; position: absolute; width: 6px; height: 6px; 
+            background: var(--white); top: 12px; 
+        }
+        .p0nch0::before { left: 10px; } .p0nch0::after { right: 10px; }
+        .p0nch0-mouth { 
+            position: absolute; bottom: 10px; left: 12px; 
+            width: 20px; height: 6px; border: 3px solid var(--white); border-top: none;
+        }
+
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+        .bubble {
+            background: white; color: black;
+            padding: 6px; border-radius: 8px;
+            font-family: var(--pixel-font); font-size: 7px;
+            position: absolute; right: 15px; top: 15px;
+            max-width: 150px; line-height: 1.4;
+        }
+
+        .content-area { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; }
+        .question-txt { font-size: 1rem; font-weight: bold; margin-bottom: 15px; text-align: center; color: #ffcc00; }
+        .options-list { display: flex; flex-direction: column; gap: 8px; }
+
+        .btn-action {
+            background: black; color: white; border: 2px solid white;
+            padding: 12px; font-family: var(--pixel-font); font-size: 8px;
+            text-align: left; width: 100%; cursor: pointer;
+        }
+        .btn-action:active { background: white; color: black; }
+
+        #overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+            z-index: 1000;
+        }
+
+        .ttt-board { display: grid; grid-template-columns: repeat(3, 70px); gap: 5px; }
+        .ttt-cell { 
+            width: 70px; height: 70px; border: 2px solid white; 
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--pixel-font); font-size: 20px;
+        }
+
+        #dodge-box {
+            width: 200px; height: 200px; border: 3px solid white;
+            position: relative; overflow: hidden; background: #050505;
+        }
+        #heart {
+            width: 20px; height: 20px; color: red; position: absolute;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .bullet { position: absolute; background: white; width: 8px; height: 8px; }
+
+        .timer-progress { width: 100%; height: 8px; background: #222; }
+        #timer-fill { width: 100%; height: 100%; background: var(--orange); transition: width 0.1s linear; }
+        #q-counter { font-size: 8px; color: #888; margin-bottom: 5px; text-align: center; font-family: var(--pixel-font); }
+        
+        .penalty-flash {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: red; font-family: var(--pixel-font); font-size: 12px;
+            pointer-events: none; animation: fadeOut 1s forwards;
+        }
+        @keyframes fadeOut { from {opacity: 1; transform: translate(-50%, -100%);} to {opacity: 0; transform: translate(-50%, -200%);} }
+    </style>
+</head>
+<body>
+
+<div id="game-viewport">
+    <header>
+        <div class="hp-bar" id="hp-bar"></div>
+        <div class="timer-box">TIEMPO: <span id="time-val">35</span></div>
+    </header>
+    <div class="timer-progress"><div id="timer-fill"></div></div>
+
+    <div class="boss-container">
+        <div class="p0nch0"><div class="p0nch0-mouth"></div></div>
+        <div class="bubble" id="boss-msg">SISTEMA LISTO.</div>
+    </div>
+
+    <div class="content-area" id="main-content">
+        <div id="start-screen" style="text-align: center;">
+            <h1 style="font-family: var(--pixel-font); font-size: 14px; margin: 20px 0; color: var(--orange);">HARDWARE REVENGE</h1>
+            <p style="margin-bottom: 20px; font-size: 0.8rem; line-height: 1.5;">25 Preguntas técnicas.<br>Si tardas en los minijuegos, se restará tiempo de la siguiente pregunta.</p>
+            <button class="btn-action" onclick="initGame()" style="text-align: center;">[ CARGAR EXAMEN ]</button>
+        </div>
+
+        <div id="quiz-screen" style="display: none;">
+            <div id="q-counter">PREGUNTA 1/25</div>
+            <div class="question-txt" id="q-text"></div>
+            <div class="options-list" id="q-options"></div>
+        </div>
+
+        <div id="end-screen" style="display: none;">
+            <h2 id="result-title" style="font-family: var(--pixel-font); margin-bottom: 20px;"></h2>
+            <div id="final-stats" style="margin-bottom: 20px; font-family: var(--pixel-font); font-size: 9px; line-height: 1.6;"></div>
+            <input type="text" id="student-name" placeholder="NOMBRE DEL ALUMNO" style="width:100%; padding:12px; margin-bottom:10px; background:#000; color:#fff; border:1px solid #fff; font-family: var(--pixel-font); font-size: 8px;">
+            <button class="btn-action" onclick="sendResult()">[ ENVIAR A REVISIÓN ]</button>
+        </div>
+    </div>
+
+    <div id="overlay">
+        <h2 id="game-title" style="font-family: var(--pixel-font); font-size: 10px; margin-bottom: 10px; color: red;">¡INTERRUPCIÓN!</h2>
+        <div id="game-container"></div>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { q: "¿Componente principal del filtrado transitorio?", o: ["Diodo", "Varistor", "Transistor", "Inductor"], a: 1 },
+        { q: "¿Etapa que transforma CA en CC?", o: ["Transformación", "Rectificación", "Regulación", "Filtro"], a: 1 },
+        { q: "¿Función del Termistor en la PSU?", o: ["Sube el voltaje", "Evita picos de gran consumo", "Mide el cooler", "Filtra ruido"], a: 1 },
+        { q: "¿Si eliges 110V en un país de 220V?", o: ["No pasa nada", "Se quema la fuente", "Ahorras energía", "Funciona mejor"], a: 1 },
+        { q: "¿Qué usa el puente rectificador?", o: ["Capacitores", "Diodos", "Resistencias", "Bobinas"], a: 1 },
+        { q: "¿Línea más importante para GPUs modernas?", o: ["+5 V", "+3,3 V", "+12 V", "-12 V"], a: 2 },
+        { q: "¿Para qué sirve la línea +5vSB?", o: ["Potencia extra", "Alimentación con PC apagada", "Enfriar", "Solo discos"], a: 1 },
+        { q: "¿Qué circuito corrige el factor de potencia?", o: ["EPS", "APFC", "SATA", "Molex"], a: 1 },
+        { q: "¿Qué componente acumula campo magnético?", o: ["Capacitor", "Inductor", "Fusible", "Diodo"], a: 1 },
+        { q: "¿Conector principal de la Motherboard?", o: ["PCI-E", "EPS 12V", "ATX 24 pines", "Molex"], a: 2 },
+        { q: "¿Qué certificación es superior a Gold?", o: ["Silver", "White", "Platinum", "Bronze"], a: 2 },
+        { q: "¿Fórmula de la Potencia (Watts)?", o: ["W = V / A", "W = V x A", "W = A - V", "W = V + A"], a: 1 },
+        { q: "¿Qué separa la etapa primaria de la secundaria?", o: ["Capacitores", "El transformador", "El cable", "El ventilador"], a: 1 },
+        { q: "¿Tamaño de gabinete más común?", o: ["Full Tower", "Slim", "Mid Tower", "CaseMOD"], a: 2 },
+        { q: "¿Grosor mínimo recomendado de acero SECC?", o: ["0,1 mm", "0,4 mm", "0,6 mm", "1,5 mm"], a: 2 },
+        { q: "¿Ventaja del sistema libre de herramientas?", o: ["Precio", "Mantenimiento fácil", "Sin cables", "Sin ruido"], a: 1 },
+        { q: "¿Ubicación ideal de la fuente?", o: ["Arriba", "Abajo", "Al costado", "Frente"], a: 1 },
+        { q: "¿Tamaño de bahías para discos SSD?", o: ["5,25\"", "3,5\"", "2,5\"", "M.2"], a: 2 },
+        { q: "¿Señal de fuente lista para Motherboard?", o: ["PS-ON", "PWR-OK", "5vSB", "COM"], a: 1 },
+        { q: "¿Qué componente dificulta el paso de corriente?", o: ["Diodo", "Resistor", "Cooler", "Relé"], a: 1 },
+        { q: "¿Ventiladores mínimos en una buena caja?", o: ["Cero", "Uno", "Dos", "Ocho"], a: 2 },
+        { q: "¿Eficiencia mínima que pide el estándar?", o: ["50%", "70%", "95%", "100%"], a: 1 },
+        { q: "¿Función de los filtros anti-polvo?", o: ["Estética", "Protección de componentes", "Velocidad", "Silencio"], a: 1 },
+        { q: "¿Cómo se mide la intensidad eléctrica?", o: ["Voltios", "Amperios", "Watts", "Ohmios"], a: 1 },
+        { q: "¿Qué componente protege ante sobretensiones?", o: ["Cooler", "Fusible", "Inductor", "Cables"], a: 1 }
+    ];
+
+    let currentQ = 0;
+    let hp = 10;
+    let score = 0;
+    let timeLeft = 35;
+    let penaltyTime = 0;
+    let timerId;
+    let gameActive = false;
+    let miniGameStartTime = 0;
+
+    function updateHP() {
+        const bar = document.getElementById('hp-bar');
+        bar.innerHTML = '<i class="fas fa-heart"></i>'.repeat(hp);
+        if (hp <= 0) {
+            gameActive = false;
+            alert("SISTEMA QUEMADO. REINICIANDO...");
+            location.reload();
+        }
+    }
+
+    function initGame() {
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('quiz-screen').style.display = 'block';
+        gameActive = true;
+        updateHP();
+        showQuestion();
+        startGlobalTimer();
+    }
+
+    function startGlobalTimer() {
+        timerId = setInterval(() => {
+            if (!gameActive) return;
+            timeLeft -= 0.1;
+            document.getElementById('time-val').innerText = Math.ceil(timeLeft);
+            document.getElementById('timer-fill').style.width = (timeLeft / 35 * 100) + '%';
+            
+            if (timeLeft <= 0) {
+                hp--;
+                updateHP();
+                nextQuestion();
+            }
+        }, 100);
+    }
+
+    function showQuestion() {
+        if (currentQ >= questions.length) return finishGame();
+        
+        // Aplicar penalización y resetear
+        timeLeft = 35 - penaltyTime;
+        if (timeLeft < 5) timeLeft = 5; // Mínimo de 5 segundos de gracia
+        
+        if (penaltyTime > 0) {
+            const flash = document.createElement('div');
+            flash.className = 'penalty-flash';
+            flash.innerText = `-${penaltyTime}s`;
+            document.body.appendChild(flash);
+            setTimeout(() => flash.remove(), 1000);
+        }
+        
+        penaltyTime = 0;
+        
+        document.getElementById('q-counter').innerText = `RETO ${currentQ + 1}/25`;
+        const q = questions[currentQ];
+        document.getElementById('q-text').innerText = q.q;
+        const options = document.getElementById('q-options');
+        options.innerHTML = '';
+        
+        q.o.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-action';
+            btn.innerText = `[ ${opt} ]`;
+            btn.onclick = () => checkAnswer(i);
+            options.appendChild(btn);
+        });
+        setBossMsg("Analizando...");
+    }
+
+    function checkAnswer(idx) {
+        if (idx === questions[currentQ].a) {
+            score++;
+            if (Math.random() > 0.6) launchMinigame();
+            else nextQuestion();
+        } else {
+            hp--;
+            updateHP();
+            setBossMsg("¡FRACASO TOTAL!");
+            nextQuestion();
+        }
+    }
+
+    function nextQuestion() {
+        currentQ++;
+        if (currentQ < questions.length) showQuestion();
+        else finishGame();
+    }
+
+    function launchMinigame() {
+        gameActive = false; // Detener el timer de la pregunta
+        miniGameStartTime = Date.now();
+        
+        const overlay = document.getElementById('overlay');
+        const container = document.getElementById('game-container');
+        overlay.style.display = 'flex';
+        container.innerHTML = '';
+        
+        setBossMsg("TE COSTARÁ MÁS LA PRÓXIMA. JAJAJA");
+        
+        const selected = Math.random() > 0.5 ? 'ttt' : 'dodge';
+        if (selected === 'ttt') startTateti(container);
+        else startDodge(container);
+    }
+
+    function startTateti(container) {
+        document.getElementById('game-title').innerText = "GANA O EMPATA";
+        let board = ["", "", "", "", "", "", "", "", ""];
+        const grid = document.createElement('div');
+        grid.className = 'ttt-board';
+        const render = () => {
+            grid.innerHTML = '';
+            board.forEach((c, i) => {
+                const cell = document.createElement('div');
+                cell.className = 'ttt-cell'; cell.innerText = c;
+                cell.onclick = () => {
+                    if (board[i] === "") {
+                        board[i] = "X";
+                        if (checkWin(board, "X")) end(true);
+                        else {
+                            let empty = board.map((v, idx) => v === "" ? idx : null).filter(v => v !== null);
+                            if (empty.length === 0) end(true);
+                            else { board[empty[0]] = "O"; render(); if (checkWin(board, "O")) end(false); }
+                        }
+                    }
+                };
+                grid.appendChild(cell);
+            });
+        };
+        const checkWin = (b, p) => [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]].some(c => c.every(idx => b[idx] === p));
+        const end = (win) => {
+            let duration = Math.floor((Date.now() - miniGameStartTime) / 1000);
+            penaltyTime = duration;
+            setTimeout(() => {
+                document.getElementById('overlay').style.display = 'none';
+                if (!win) { hp--; updateHP(); }
+                gameActive = true;
+                nextQuestion();
+            }, 500);
+        };
+        container.appendChild(grid); render();
+    }
+
+    function startDodge(container) {
+        document.getElementById('game-title').innerText = "ESQUIVA 5 SEG";
+        const box = document.createElement('div'); box.id = 'dodge-box';
+        const heart = document.createElement('div'); heart.id = 'heart'; heart.innerHTML = '❤️';
+        box.appendChild(heart); container.appendChild(box);
+        let hPos = { x: 90, y: 90 }; let bullets = [];
+        
+        box.ontouchmove = (e) => {
+            let rect = box.getBoundingClientRect();
+            hPos.x = e.touches[0].clientX - rect.left - 10;
+            hPos.y = e.touches[0].clientY - rect.top - 10;
+            heart.style.left = hPos.x + 'px'; heart.style.top = hPos.y + 'px';
+        };
+
+        let dTimer = 0;
+        let dInt = setInterval(() => {
+            dTimer += 100;
+            if (Math.random() > 0.6) {
+                const b = document.createElement('div'); b.className = 'bullet';
+                b.style.left = '200px'; b.style.top = Math.random() * 190 + 'px';
+                box.appendChild(b); bullets.push({ el: b, x: 200, y: parseFloat(b.style.top) });
+            }
+            bullets.forEach((b) => {
+                b.x -= 12; b.el.style.left = b.x + 'px';
+                if (Math.abs(b.x - hPos.x) < 15 && Math.abs(b.y - hPos.y) < 15) {
+                    clearInterval(dInt); finishDodge(false);
+                }
+            });
+            if (dTimer > 5000) { clearInterval(dInt); finishDodge(true); }
+        }, 100);
+
+        function finishDodge(win) {
+            let duration = Math.floor((Date.now() - miniGameStartTime) / 1000);
+            penaltyTime = duration;
+            document.getElementById('overlay').style.display = 'none';
+            if (!win) { hp--; updateHP(); }
+            gameActive = true;
+            nextQuestion();
+        }
+    }
+
+    function setBossMsg(msg) { document.getElementById('boss-msg').innerText = msg; }
+
+    function finishGame() {
+        gameActive = false; clearInterval(timerId);
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('end-screen').style.display = 'block';
+        const passed = score >= 18;
+        document.getElementById('result-title').innerText = passed ? "APROBADO" : "REPROBADO";
+        document.getElementById('result-title').style.color = passed ? "#2ecc71" : "#e74c3c";
+        document.getElementById('final-stats').innerHTML = `ACIERTOS: ${score}/25<br>INTEGRIDAD: ${hp}/10<br>TIEMPO FINAL: ${Math.ceil(timeLeft)}s`;
+    }
+
+    function sendResult() {
+        const name = document.getElementById('student-name').value;
+        if (!name) return alert("Identifícate.");
+        const text = `*HARDWARE EXAM*%0A*Técnico:* ${name}%0A*Nota:* ${score}/25%0A*HP:* ${hp}%0A*Estado:* ${score >= 18 ? 'APROBADO' : 'REPROBADO'}`;
+        window.open(`https://wa.me/543816490060?text=${text}`);
+    }
+</script>
+</body>
+</html>
