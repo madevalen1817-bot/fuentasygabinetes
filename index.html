@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SISTEMA HARDWARE - PROTOCOLO CAOS EVOLVED</title>
+    <title>SISTEMA HARDWARE - PROTOCOLO CAOS FINAL</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
@@ -13,6 +13,7 @@
             --white: #ffffff;
             --pixel-font: 'Press Start 2P', cursive;
             --danger: #ff0033;
+            --correct: #00ff00;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; touch-action: none; }
@@ -26,6 +27,7 @@
             display: flex; justify-content: center;
         }
 
+        /* EFECTOS DE CAOS */
         @keyframes shake {
             0% { transform: translate(1px, 1px); }
             20% { transform: translate(-3px, 0px); }
@@ -52,75 +54,62 @@
         .timer-box { color: var(--orange); font-size: 11px; }
 
         .boss-area {
-            height: 140px; display: flex; flex-direction: column;
+            height: 130px; display: flex; flex-direction: column;
             align-items: center; justify-content: center; position: relative;
             background: radial-gradient(circle, #1a0a00 0%, #000 70%);
         }
 
         .p0nch0 {
-            width: 55px; height: 55px; border: 3px solid var(--white);
+            width: 50px; height: 50px; border: 3px solid var(--white);
             position: relative; animation: float 1.5s infinite ease-in-out;
             background: #000;
         }
-        .p0nch0::before, .p0nch0::after { content: ''; position: absolute; width: 6px; height: 6px; background: white; top: 15px; }
-        .p0nch0::before { left: 12px; } .p0nch0::after { right: 12px; }
-        .mouth { position: absolute; bottom: 10px; left: 15px; width: 25px; height: 6px; border: 3px solid white; border-top: none; }
+        .p0nch0::before, .p0nch0::after { content: ''; position: absolute; width: 6px; height: 6px; background: white; top: 12px; }
+        .p0nch0::before { left: 10px; } .p0nch0::after { right: 10px; }
+        .mouth { position: absolute; bottom: 8px; left: 12px; width: 20px; height: 5px; border: 3px solid white; border-top: none; }
 
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 
         .bubble {
-            background: white; color: black; padding: 8px; border-radius: 4px;
+            background: white; color: black; padding: 6px; border-radius: 4px;
             font-family: var(--pixel-font); font-size: 7px;
-            position: absolute; right: 10px; top: 20px; max-width: 160px;
+            position: absolute; right: 10px; top: 15px; max-width: 150px; z-index: 10;
         }
 
-        .content-area { flex: 1; padding: 20px; display: flex; flex-direction: column; }
-        .q-text { font-size: 1rem; font-weight: bold; margin-bottom: 20px; text-align: center; color: #ffcc00; }
+        .content-area { flex: 1; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; }
+        .q-text { font-size: 0.9rem; font-weight: bold; margin-bottom: 15px; text-align: center; color: #ffcc00; }
         
         .option-btn {
             background: #111; color: white; border: 1px solid #444;
-            padding: 14px; font-family: var(--pixel-font); font-size: 8px;
-            text-align: left; width: 100%; cursor: pointer; margin-bottom: 10px;
+            padding: 12px; font-family: var(--pixel-font); font-size: 7px;
+            text-align: left; width: 100%; cursor: pointer; margin-bottom: 8px;
+            line-height: 1.4;
         }
         .option-btn:active { background: var(--orange); color: black; }
 
         .overlay {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.95);
+            position: absolute; inset: 0; background: rgba(0,0,0,0.96);
             display: none; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 100;
+            z-index: 100; padding: 20px; text-align: center;
         }
 
-        /* DODGE FIELD */
-        #dodge-field {
-            width: 280px; height: 280px; border: 4px solid white;
-            position: relative; overflow: hidden; background: #000;
-        }
-        #player-heart {
-            width: 20px; height: 20px; position: absolute;
-            color: red; font-size: 20px; z-index: 5;
-        }
+        /* FEEDBACK UI */
+        .feedback-title { font-family: var(--pixel-font); font-size: 14px; margin-bottom: 20px; }
+        .feedback-body { font-size: 0.9rem; line-height: 1.6; margin-bottom: 25px; color: #ccc; }
+
+        /* MINIGAMES */
+        #dodge-field { width: 260px; height: 260px; border: 4px solid white; position: relative; overflow: hidden; background: #000; }
+        #player-heart { width: 20px; height: 20px; position: absolute; color: red; font-size: 20px; z-index: 5; }
         .bullet { position: absolute; background: white; width: 10px; height: 10px; border-radius: 50%; }
+        .ttt-grid { display: grid; grid-template-columns: repeat(3, 75px); gap: 8px; }
+        .ttt-cell { width: 75px; height: 75px; border: 2px solid white; display: flex; align-items: center; justify-content: center; font-family: var(--pixel-font); font-size: 24px; }
+        .mash-bar { width: 100%; height: 25px; border: 2px solid white; margin: 15px 0; }
+        #mash-fill { width: 0%; height: 100%; background: var(--correct); }
 
-        /* TATETI */
-        .ttt-grid { display: grid; grid-template-columns: repeat(3, 80px); gap: 8px; }
-        .ttt-cell { 
-            width: 80px; height: 80px; border: 2px solid white; 
-            display: flex; align-items: center; justify-content: center;
-            font-family: var(--pixel-font); font-size: 28px;
-        }
-
-        /* MASH GAME */
-        .mash-bar { width: 200px; height: 30px; border: 2px solid white; position: relative; }
-        #mash-fill { width: 0%; height: 100%; background: #00ff00; }
-
-        .timer-progress { width: 100%; height: 8px; background: #222; }
+        .timer-progress { width: 100%; height: 6px; background: #222; }
         #timer-fill { width: 100%; height: 100%; background: var(--orange); }
 
-        .splash {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-family: var(--pixel-font); font-size: 20px; z-index: 500;
-            text-shadow: 2px 2px #000; pointer-events: none; display: none;
-        }
+        #q-idx-label { font-family: var(--pixel-font); font-size: 7px; color: #666; margin-bottom: 10px; text-align: center; }
     </style>
 </head>
 <body>
@@ -128,76 +117,88 @@
 <div id="game-viewport">
     <header>
         <div class="hp-bar" id="hp-display"></div>
-        <div class="timer-box">TEMP: <span id="time-left">35</span>s</div>
+        <div class="timer-box">TIME: <span id="time-left">35</span></div>
     </header>
     <div class="timer-progress"><div id="timer-fill"></div></div>
 
     <div class="boss-area">
         <div class="p0nch0" id="boss-sprite"><div class="mouth"></div></div>
-        <div class="bubble" id="boss-talk">SISTEMA INICIADO.</div>
+        <div class="bubble" id="boss-talk">SISTEMA LISTO.</div>
     </div>
 
     <div class="content-area" id="screen-main">
-        <div id="start-ui" style="text-align: center; margin-top: 40px;">
-            <h1 style="font-family: var(--pixel-font); font-size: 14px; color: var(--orange); margin-bottom: 20px;">HARDWARE: PROTOCOLO CAOS</h1>
-            <p style="font-size: 11px; line-height: 1.8; margin-bottom: 30px;">
-                Responde 25 preguntas.<br>
-                Cada combate te robará tiempo.<br>
-                La dificultad sube cada 8 preguntas.
+        <!-- Inicio -->
+        <div id="start-ui" style="text-align: center; margin-top: 30px;">
+            <h1 style="font-family: var(--pixel-font); font-size: 14px; color: var(--orange); margin-bottom: 20px;">PROTOCOLO HARDWARE</h1>
+            <p style="font-size: 10px; line-height: 1.8; margin-bottom: 25px;">
+                25 Preguntas Aleatorias.<br>
+                Feedback en tiempo real.<br>
+                Sobrevive con al menos 1 HP.
             </p>
-            <button class="option-btn" onclick="startGame()" style="text-align: center;">[ INICIAR ]</button>
+            <button class="option-btn" onclick="startGame()" style="text-align: center;">[ INICIAR REVISIÓN ]</button>
         </div>
 
+        <!-- Quiz -->
         <div id="quiz-ui" style="display: none;">
+            <div id="q-idx-label">PREGUNTA 00/25</div>
             <div id="q-txt" class="q-text"></div>
             <div id="q-options"></div>
         </div>
 
+        <!-- Resultados -->
         <div id="result-ui" style="display: none; text-align: center;">
-            <h2 id="final-status" style="font-family: var(--pixel-font); font-size: 14px;"></h2>
-            <div id="final-stats" style="font-family: var(--pixel-font); font-size: 8px; margin: 20px 0;"></div>
-            <input type="text" id="user-name" placeholder="NOMBRE TÉCNICO" style="width:100%; padding:15px; background:black; color:white; border:1px solid white; font-family: var(--pixel-font); font-size: 8px; margin-bottom: 10px;">
-            <button class="option-btn" onclick="sendWhatsApp()" style="text-align: center;">[ ENVIAR ]</button>
+            <h2 id="final-status" style="font-family: var(--pixel-font); font-size: 12px;"></h2>
+            <div id="final-stats" style="font-family: var(--pixel-font); font-size: 8px; margin: 20px 0; line-height: 1.8;"></div>
+            <input type="text" id="user-name" placeholder="NOMBRE DEL TÉCNICO" style="width:100%; padding:15px; background:black; color:white; border:1px solid white; font-family: var(--pixel-font); font-size: 8px; margin-bottom: 15px;">
+            <button class="option-btn" onclick="sendWhatsApp()" style="text-align: center;">[ TRANSMITIR REPORTE ]</button>
         </div>
     </div>
 
-    <div id="game-overlay" class="overlay">
-        <div id="diff-label" style="font-family: var(--pixel-font); font-size: 8px; color: yellow; margin-bottom: 10px;">DIFICULTAD: NORMAL</div>
-        <div id="game-box"></div>
+    <!-- Feedback Overlay -->
+    <div id="feedback-overlay" class="overlay">
+        <h2 id="fb-title" class="feedback-title"></h2>
+        <p id="fb-body" class="feedback-body"></p>
+        <button class="option-btn" onclick="closeFeedback()" style="text-align: center;">[ CONTINUAR ]</button>
     </div>
 
-    <div id="splash" class="splash"></div>
+    <!-- Mini-Game Overlay -->
+    <div id="game-overlay" class="overlay">
+        <div id="diff-tag" style="font-family: var(--pixel-font); font-size: 7px; color: yellow; margin-bottom: 10px;">DIFICULTAD: NORMAL</div>
+        <div id="game-box"></div>
+    </div>
 </div>
 
 <script>
-    const questions = [
-        { q: "¿Componente principal del filtrado transitorio?", o: ["Diodo", "Varistor", "Transistor", "Inductor"], a: 1 },
-        { q: "¿Etapa que transforma CA en CC?", o: ["Transformación", "Rectificación", "Regulación", "Filtro"], a: 1 },
-        { q: "¿Función del Termistor?", o: ["Sube voltaje", "Evita picos", "Mide cooler", "Filtra"], a: 1 },
-        { q: "¿110V en toma de 220V?", o: ["Nada", "Explota/Se quema", "Ahorra", "Mejora"], a: 1 },
-        { q: "¿Qué usa el puente rectificador?", o: ["Capacitores", "Diodos", "Resistencias", "Bobinas"], a: 1 },
-        { q: "¿Línea para GPUs modernas?", o: ["+5V", "+3.3V", "+12V", "-12V"], a: 2 },
-        { q: "¿Para qué es +5vSB?", o: ["Potencia", "PC Apagada/Standby", "Enfriar", "Solo SSD"], a: 1 },
-        { q: "¿Circuito de factor de potencia?", o: ["EPS", "APFC", "SATA", "Molex"], a: 1 },
-        { q: "¿Qué componente acumula campo magnético?", o: ["Capacitor", "Inductor", "Fusible", "Diodo"], a: 1 },
-        { q: "¿Conector Motherboard?", o: ["PCI-E", "EPS", "ATX 24p", "Molex"], a: 2 },
-        { q: "¿Certificación superior a Gold?", o: ["Silver", "White", "Platinum", "Bronze"], a: 2 },
-        { q: "¿Fórmula Watts?", o: ["W=V/A", "W=V*A", "W=A-V", "W=V+A"], a: 1 },
-        { q: "¿Separa etapa primaria de secundaria?", o: ["Capacitores", "Transformador", "Cable", "Cooler"], a: 1 },
-        { q: "¿Gabinete más común?", o: ["Full", "Slim", "Mid Tower", "Mini"], a: 2 },
-        { q: "¿Grosor mínimo acero SECC?", o: ["0.1mm", "0.4mm", "0.6mm", "1mm"], a: 2 },
-        { q: "¿Ubicación ideal de la fuente?", o: ["Arriba", "Abajo", "Lado", "Frente"], a: 1 },
-        { q: "¿SSD en bahía de...?", o: ["5.25\"", "3.5\"", "2.5\"", "1.0\""], a: 2 },
-        { q: "¿Señal de fuente lista?", o: ["PS-ON", "PWR-OK", "5vSB", "COM"], a: 1 },
-        { q: "¿Dificulta paso de corriente?", o: ["Diodo", "Resistor", "Cooler", "Relé"], a: 1 },
-        { q: "¿Ventiladores mínimos en buena caja?", o: ["0", "1", "2", "8"], a: 2 },
-        { q: "¿Eficiencia mínima estándar?", o: ["50%", "70%", "95%", "100%"], a: 1 },
-        { q: "¿Función filtros anti-polvo?", o: ["Lujo", "Protección", "Velocidad", "Silencio"], a: 1 },
-        { q: "¿Mide intensidad eléctrica?", o: ["Volt", "Amper", "Watt", "Ohm"], a: 1 },
-        { q: "¿Protege ante sobretensión?", o: ["Cooler", "Fusible", "Inductor", "Led"], a: 1 },
-        { q: "¿Última etapa de la PSU?", o: ["Filtro/Regulación", "Rectificación", "Entrada", "Multiplicación"], a: 0 }
+    // Base de datos de preguntas basada en el PDF
+    const baseQuestions = [
+        { q: "¿Cuál es el componente principal del filtrado transitorio?", o: ["Varistor", "Diodo", "Transformador", "Transistor"], a: "Varistor", e: "El varistor se encarga de cortar los picos de tensión recibidos desde el suministro eléctrico." },
+        { q: "¿Qué etapa transforma la corriente alterna (CA) en continua (CC)?", o: ["Rectificación", "Conmutación", "Filtrado Transitorio", "Regulación"], a: "Rectificación", e: "La rectificación utiliza diodos para transformar la onda sinusoidal en una línea recta." },
+        { q: "¿Qué componente evita que la interferencia de la fuente pase a la red eléctrica?", o: ["Filtrado Transitorio", "Multiplicador", "Salidas de 12V", "Inversores"], a: "Filtrado Transitorio", e: "Esta etapa evita la interferencia electromagnética hacia la red eléctrica." },
+        { q: "¿Para qué sirve el Termistor en la fuente?", o: ["Evita daños por grandes consumos", "Aumenta la frecuencia", "Regula los 12V", "Filtra los 5V"], a: "Evita daños por grandes consumos", e: "Es una resistencia variable que impide que picos de consumo dañen componentes internos." },
+        { q: "¿Qué sucede si seleccionamos 110V en un país con 220V?", o: ["Se quema la fuente", "Funciona más rápido", "Se activa el modo ahorro", "No enciende"], a: "Se quema la fuente", e: "El multiplicador de tensión llevaría el voltaje a niveles que los capacitores no soportan." },
+        { q: "¿Cuál es el rango de frecuencia de una fuente conmutada?", o: ["10 KHz a 1 MHz", "50 a 60 Hz", "1 a 10 Hz", "Solo 220V"], a: "10 KHz a 1 MHz", e: "Las fuentes conmutadas elevan la frecuencia de red a valores mucho más altos para eficiencia." },
+        { q: "¿Qué línea de tensión es vital para CPUs y GPUs modernas?", o: ["+12 V", "+5 V", "+3.3 V", "-5 V"], a: "+12 V", e: "La línea de +12V es la más importante y la que soporta la mayor carga de energía." },
+        { q: "¿Qué significa +5vSB?", o: ["Línea Stand-By", "Super Boost", "Serial Bus", "Salida Secundaria"], a: "Línea Stand-By", e: "Es una línea que siempre está activa, permitiendo encender la PC por teclado o Wake-on-LAN." },
+        { q: "¿Cuál es la función del circuito APFC?", o: ["Corregir el factor de potencia", "Enfriar la fuente", "Multiplicar los 220V", "Proteger contra agua"], a: "Corregir el factor de potencia", e: "El APFC reduce la potencia reactiva, mejorando la eficiencia energética." },
+        { q: "¿Qué componente acumula energía en campo magnético?", o: ["Inductor (Bobina)", "Capacitor", "Resistor", "Fusible"], a: "Inductor (Bobina)", e: "Los inductores o bobinas acumulan energía en forma de campo magnético." },
+        { q: "¿Cómo se llama el conector de 24 pines?", o: ["ATX Power", "EPS", "PCI-Express", "Molex"], a: "ATX Power", e: "Es el conector principal que da energía a la motherboard, memoria y buses." },
+        { q: "En certificación 80 Plus, ¿qué nivel es mejor que Gold?", o: ["Platinum", "Silver", "White", "Bronze"], a: "Platinum", e: "El orden de eficiencia es White, Bronze, Silver, Gold, Platinum y Titanium." },
+        { q: "¿Cuál es la fórmula para calcular Potencia (Watts)?", o: ["Watts = Volts x Amperes", "Watts = Volts / Amperes", "Watts = Amperes + Volts", "Watts = Volts x 220"], a: "Watts = Volts x Amperes", e: "La potencia consumida es el producto de la tensión por la intensidad." },
+        { q: "¿Qué etapa separa físicamente la zona primaria de la secundaria?", o: ["Transformación", "Rectificación", "Entrada de Red", "Filtro de Salida"], a: "Transformación", e: "El transformador separa por inducción electromagnética el alto voltaje del bajo voltaje." },
+        { q: "¿Qué material de gabinete se recomienda con grosor mín. de 0,6mm?", o: ["Acero SECC", "Plástico ABS", "Acrílico", "Aluminio"], a: "Acero SECC", e: "El acero electrogalvanizado de 0,6mm garantiza dureza para soportar el manejo." },
+        { q: "¿Cuál es el tamaño de gabinete estándar?", o: ["Mid Tower", "Full Tower", "Slim SFF", "CaseMOD"], a: "Mid Tower", e: "La Mid Tower (Torre Media) es el estándar más utilizado para la mayoría de los usuarios." },
+        { q: "¿Dónde es ideal ubicar la fuente en el gabinete?", o: ["En la parte inferior", "En la parte superior", "Al frente", "Afuera"], a: "En la parte inferior", e: "Abajo permite una mejor refrigeración independiente para la fuente y el sistema." },
+        { q: "¿Para qué sirven las bahías de 2.5 pulgadas?", o: ["Discos SSD", "Lectores de DVD", "Discos Mecánicos", "Disqueteras"], a: "Discos SSD", e: "Las bahías de 2.5 son el estándar para los discos de estado sólido actuales." },
+        { q: "¿Qué señal indica que la fuente está lista (Power Good)?", o: ["PWR-OK", "PS-ON", "5vSB", "COM"], a: "PWR-OK", e: "La línea PWR-OK comunica a la motherboard que la fuente está bien para ser usada." },
+        { q: "¿Qué componente dificulta el paso de la corriente?", o: ["Resistor", "Diodo", "Capacitor", "Fusible"], a: "Resistor", e: "Los resistores (o resistencias) dificultan el paso de la corriente entre sus bornes." },
+        { q: "¿Cuántos ventiladores mínimos se recomiendan?", o: ["Dos (Entrada y Salida)", "Ninguno", "Uno (Atrás)", "Seis"], a: "Dos (Entrada y Salida)", e: "Lo ideal es uno metiendo aire frontal y otro sacando aire por la parte trasera." },
+        { q: "¿Qué eficiencia mínima requiere el estándar hoy?", o: ["70%", "50%", "90%", "100%"], a: "70%", e: "El estándar requiere al menos un 70% de eficiencia para no desperdiciar energía en calor." },
+        { q: "¿Para qué sirven los filtros anti-polvo?", o: ["Evitar entrada de suciedad e insectos", "Bajar el ruido", "Aumentar los FPS", "Adorno"], a: "Evitar entrada de suciedad e insectos", e: "Evitan que los componentes se dañen por suciedad acumulada." },
+        { q: "¿Qué unidad mide la intensidad de corriente?", o: ["Amperio", "Voltio", "Watt", "Ohmio"], a: "Amperio", e: "El Amper representa la intensidad con la que fluye la electricidad en un circuito." },
+        { q: "¿Qué componente protege ante sobretensiones cortándose?", o: ["Fusible", "Inductor", "Transistor", "Transformador"], a: "Fusible", e: "El fusible protege la fuente cortándose automáticamente ante una sobretensión." }
     ];
 
+    let shuffledQuestions = [];
     let currentIdx = 0;
     let hp = 10;
     let score = 0;
@@ -205,169 +206,232 @@
     let penalty = 0;
     let timerId;
     let active = false;
+    let miniGameStartTime = 0;
+
+    // Función para mezclar arrays (Fisher-Yates)
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
 
     function startGame() {
+        // Mezclar preguntas y luego mezclar opciones de cada pregunta
+        shuffledQuestions = shuffle([...baseQuestions]).map(q => {
+            return { ...q, o: shuffle([...q.o]) };
+        });
+
         document.getElementById('start-ui').style.display = 'none';
         document.getElementById('quiz-ui').style.display = 'block';
         updateHP();
         loadQuestion();
         active = true;
-        timerId = setInterval(() => {
-            if (!active) return;
-            timeLeft -= 0.1;
-            if (timeLeft <= 0) { damage(2); nextQuestion(); }
-            document.getElementById('time-left').innerText = Math.ceil(timeLeft);
-            document.getElementById('timer-fill').style.width = (timeLeft / 35 * 100) + '%';
-        }, 100);
+        timerId = setInterval(tick, 100);
+    }
+
+    function tick() {
+        if (!active) return;
+        timeLeft -= 0.1;
+        if (timeLeft <= 0) {
+            damage(2, "¡DEMASIADO LENTO!");
+            nextQuestion();
+        }
+        document.getElementById('time-left').innerText = Math.ceil(timeLeft);
+        document.getElementById('timer-fill').style.width = (timeLeft / 35 * 100) + '%';
     }
 
     function loadQuestion() {
-        if (currentIdx >= questions.length) return finish();
+        if (currentIdx >= shuffledQuestions.length) return finish();
+        
         timeLeft = 35 - penalty;
         if (timeLeft < 5) timeLeft = 5;
         penalty = 0;
-        const q = questions[currentIdx];
+
+        const q = shuffledQuestions[currentIdx];
+        document.getElementById('q-idx-label').innerText = `PREGUNTA ${currentIdx + 1}/25`;
         document.getElementById('q-txt').innerText = q.q;
         const opts = document.getElementById('q-options');
         opts.innerHTML = '';
-        q.o.forEach((o, i) => {
+        
+        q.o.forEach((opt) => {
             const b = document.createElement('button');
             b.className = 'option-btn';
-            b.innerText = `> ${o}`;
-            b.onclick = () => { if (i === q.a) { score++; if (Math.random() > 0.6) launchBattle(); else nextQuestion(); } else { damage(1); nextQuestion(); } };
+            b.innerText = `> ${opt}`;
+            b.onclick = () => checkAnswer(opt);
             opts.appendChild(b);
         });
     }
 
-    function damage(n) {
+    function checkAnswer(selected) {
+        const q = shuffledQuestions[currentIdx];
+        active = false; // Pausar timer
+
+        if (selected === q.a) {
+            score++;
+            if (Math.random() > 0.6) {
+                launchBattle();
+            } else {
+                nextQuestion();
+            }
+        } else {
+            damage(1, "¡ERROR DE DATOS!");
+            showFeedback(q);
+        }
+    }
+
+    function showFeedback(q) {
+        const fb = document.getElementById('feedback-overlay');
+        document.getElementById('fb-title').innerText = "¡ERROR CRÍTICO!";
+        document.getElementById('fb-title').style.color = "red";
+        document.getElementById('fb-body').innerText = q.e;
+        fb.style.display = 'flex';
+    }
+
+    function closeFeedback() {
+        document.getElementById('feedback-overlay').style.display = 'none';
+        nextQuestion();
+    }
+
+    function damage(n, msg) {
         hp -= n;
         updateHP();
+        document.getElementById('boss-talk').innerText = msg;
         document.getElementById('game-viewport').classList.add('shake');
-        setTimeout(() => document.getElementById('game-viewport').classList.remove('shake'), 200);
-        if (hp <= 0) { alert("SISTEMA QUEMADO."); location.reload(); }
+        setTimeout(() => document.getElementById('game-viewport').classList.remove('shake'), 300);
+        if (hp <= 0) {
+            alert("INTEGRIDAD DEL SISTEMA: 0%. REINICIANDO...");
+            location.reload();
+        }
     }
 
-    function updateHP() { document.getElementById('hp-display').innerHTML = 'HP:' + '<i class="fas fa-heart"></i>'.repeat(hp); }
-
-    function nextQuestion() { currentIdx++; loadQuestion(); }
-
-    function getDifficulty() {
-        if (currentIdx < 8) return { level: 1, label: "FÁCIL", speed: 3, freq: 15 };
-        if (currentIdx < 16) return { level: 2, label: "NORMAL", speed: 5, freq: 10 };
-        return { level: 3, label: "CAOS", speed: 8, freq: 5 };
+    function updateHP() {
+        document.getElementById('hp-display').innerHTML = 'HP:' + '<i class="fas fa-heart"></i>'.repeat(hp);
     }
 
+    function nextQuestion() {
+        currentIdx++;
+        active = true;
+        loadQuestion();
+    }
+
+    // --- SISTEMA DE BATALLA ---
     function launchBattle() {
-        active = false;
-        const diff = getDifficulty();
-        const startTime = Date.now();
+        miniGameStartTime = Date.now();
+        const diff = currentIdx < 8 ? 1 : (currentIdx < 16 ? 2 : 3);
         const overlay = document.getElementById('game-overlay');
         overlay.style.display = 'flex';
-        document.getElementById('diff-label').innerText = "DIFICULTAD: " + diff.label;
-        document.getElementById('diff-label').style.color = diff.level === 3 ? "red" : "yellow";
-
+        
         const container = document.getElementById('game-box');
         container.innerHTML = '';
         
         const games = ['DODGE', 'TATETI', 'MASH'];
         const game = games[Math.floor(Math.random() * (currentIdx < 10 ? 2 : 3))];
 
-        if (game === 'DODGE') startDodge(container, startTime, diff);
-        else if (game === 'TATETI') startTateti(container, startTime, diff);
-        else startMash(container, startTime, diff);
+        document.getElementById('diff-tag').innerText = "DIFICULTAD: " + (diff==1?"FÁCIL":diff==2?"NORMAL":"CAOS");
+        document.getElementById('boss-talk').innerText = "TE COSTARÁ TIEMPO. JAJAJA";
+
+        if (game === 'DODGE') startDodge(container, diff);
+        else if (game === 'TATETI') startTateti(container, diff);
+        else startMash(container, diff);
     }
 
-    function endBattle(win, startTime) {
-        penalty = Math.floor((Date.now() - startTime) / 1000);
+    function endBattle(win) {
+        penalty = Math.floor((Date.now() - miniGameStartTime) / 1000);
         document.getElementById('game-overlay').style.display = 'none';
-        const splash = document.getElementById('splash');
-        splash.innerText = win ? "¡SISTEMA OK!" : "¡FALLO!";
-        splash.style.color = win ? "#00ff00" : "#ff0000";
-        splash.style.display = 'block';
-        if (!win) damage(1);
-        setTimeout(() => { splash.style.display = 'none'; active = true; nextQuestion(); }, 1000);
+        if (!win) damage(1, "¡DÉBIL!");
+        else document.getElementById('boss-talk').innerText = "Tks... solo suerte.";
+        nextQuestion();
     }
 
     // --- MINIJUEGOS ---
 
-    function startDodge(container, startTime, diff) {
+    function startDodge(container, diff) {
         const field = document.createElement('div'); field.id = 'dodge-field';
         const heart = document.createElement('div'); heart.id = 'player-heart'; heart.innerHTML = '❤️';
         field.appendChild(heart); container.appendChild(field);
-        let hX = 130, hY = 130;
-        field.onpointermove = (e) => {
+        let hX = 120, hY = 120;
+        const move = (e) => {
             const r = field.getBoundingClientRect();
-            hX = Math.max(0, Math.min(260, e.clientX - r.left - 10));
-            hY = Math.max(0, Math.min(260, e.clientY - r.top - 10));
+            const cx = e.touches ? e.touches[0].clientX : e.clientX;
+            const cy = e.touches ? e.touches[0].clientY : e.clientY;
+            hX = Math.max(0, Math.min(240, cx - r.left - 10));
+            hY = Math.max(0, Math.min(240, cy - r.top - 10));
             heart.style.left = hX + 'px'; heart.style.top = hY + 'px';
         };
-
-        let bullets = [], frame = 0;
+        field.addEventListener('pointermove', move);
+        let bullets = [], frame = 0, speed = diff*3, freq = 20 - (diff*4);
         const loop = setInterval(() => {
             frame++;
-            if (frame % diff.freq === 0) {
+            if (frame % freq === 0) {
                 const b = document.createElement('div'); b.className = 'bullet';
                 const side = Math.floor(Math.random()*4);
                 let x, y, vx, vy;
-                if(side==0){x=0;y=Math.random()*280;vx=diff.speed;vy=0;}
-                else if(side==1){x=280;y=Math.random()*280;vx=-diff.speed;vy=0;}
-                else if(side==2){x=Math.random()*280;y=0;vx=0;vy=diff.speed;}
-                else {x=Math.random()*280;y=280;vx=0;vy=-diff.speed;}
+                if(side==0){x=0;y=Math.random()*260;vx=speed;vy=0;}
+                else if(side==1){x=260;y=Math.random()*260;vx=-speed;vy=0;}
+                else if(side==2){x=Math.random()*260;y=0;vx=0;vy=speed;}
+                else {x=Math.random()*260;y=260;vx=0;vy=-speed;}
                 field.appendChild(b); bullets.push({el:b, x, y, vx, vy});
             }
             bullets.forEach((b, i) => {
                 b.x += b.vx; b.y += b.vy; b.el.style.left = b.x+'px'; b.el.style.top = b.y+'px';
-                if (Math.hypot(b.x-hX, b.y-hY) < 15) { clearInterval(loop); endBattle(false, startTime); }
-                if (b.x< -20 || b.x>300 || b.y<-20 || b.y>300) { b.el.remove(); bullets.splice(i,1); }
+                if (Math.hypot(b.x-hX, b.y-hY) < 15) { clearInterval(loop); endBattle(false); }
+                if (b.x< -20 || b.x>280 || b.y<-20 || b.y>280) { b.el.remove(); bullets.splice(i,1); }
             });
-            if (frame > 100) { clearInterval(loop); endBattle(true, startTime); }
+            if (frame > 100) { clearInterval(loop); endBattle(true); }
         }, 50);
     }
 
-    function startTateti(container, startTime, diff) {
+    function startTateti(container, diff) {
         let board = ["","","","","","","","",""];
         const grid = document.createElement('div'); grid.className = 'ttt-grid';
         const render = () => {
             grid.innerHTML = '';
             board.forEach((v, i) => {
                 const c = document.createElement('div'); c.className = 'ttt-cell'; c.innerText = v;
-                c.onclick = () => { if (board[i] === "") { board[i] = "X"; if (checkWin("X")) endBattle(true, startTime); else if (!board.includes("")) endBattle(true, startTime); else setTimeout(cpu, diff.level === 3 ? 50 : 300); } };
+                c.onclick = () => { if (board[i] === "") { board[i] = "X"; if (checkWin("X")) endBattle(true); else if (!board.includes("")) endBattle(true); else setTimeout(cpu, 200); } };
                 grid.appendChild(c);
             });
         };
         const cpu = () => {
             const free = board.map((v,i) => v===""?i:null).filter(v=>v!==null);
             board[free[Math.floor(Math.random()*free.length)]] = "O";
-            render(); if (checkWin("O")) endBattle(false, startTime);
+            render(); if (checkWin("O")) endBattle(false);
         };
         const checkWin = (p) => [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]].some(c => c.every(idx => board[idx] === p));
         container.appendChild(grid); render();
     }
 
-    function startMash(container, startTime, diff) {
-        container.innerHTML = `<div style="font-family:var(--pixel-font);font-size:8px;margin-bottom:10px">¡PRESIONA RÁPIDO!</div>
+    function startMash(container, diff) {
+        container.innerHTML = `<div style="font-family:var(--pixel-font);font-size:7px;margin-bottom:10px">¡MASH (PULSA RÁPIDO)!</div>
                                <div class="mash-bar"><div id="mash-fill"></div></div>
-                               <button class="option-btn" id="mash-btn" style="margin-top:20px;text-align:center">MASH!!</button>`;
-        let val = 50, target = 100;
+                               <button class="option-btn" id="mash-btn" style="text-align:center">PULSAR!!</button>`;
+        let val = 50;
         const fill = document.getElementById('mash-fill');
-        const btn = document.getElementById('mash-btn');
-        const dec = setInterval(() => { val -= (diff.level * 1.5); fill.style.width = val + '%'; if(val <= 0) { clearInterval(dec); endBattle(false, startTime); } }, 100);
-        btn.onpointerdown = () => { val += 8; if(val >= target) { clearInterval(dec); endBattle(true, startTime); } };
+        const dec = setInterval(() => { val -= (diff * 1.5); fill.style.width = val + '%'; if(val <= 0) { clearInterval(dec); endBattle(false); } }, 100);
+        document.getElementById('mash-btn').onpointerdown = () => { val += 7; if(val >= 100) { clearInterval(dec); endBattle(true); } };
     }
 
     function finish() {
         active = false; clearInterval(timerId);
         document.getElementById('quiz-ui').style.display = 'none';
         document.getElementById('result-ui').style.display = 'block';
-        const win = score >= 18;
-        document.getElementById('final-status').innerText = win ? "SISTEMA ESTABLE" : "SISTEMA CORRUPTO";
-        document.getElementById('final-status').style.color = win ? "green" : "red";
-        document.getElementById('final-stats').innerHTML = `ACIERTOS: ${score}/25<br>VIDA: ${hp}/10`;
+        const win = score >= 18; // Aproximadamente 72%
+        const status = document.getElementById('final-status');
+        status.innerText = win ? "SISTEMA ESTABLE (APROBADO)" : "SISTEMA CORRUPTO (REPROBADO)";
+        status.style.color = win ? var(--correct) : var(--danger);
+        document.getElementById('final-stats').innerHTML = `
+            ACIERTOS: ${score}/25<br>
+            HP FINAL: ${hp}/10<br>
+            INTEGRIDAD: ${win ? 'ÓPTIMA' : 'FALLIDA'}
+        `;
     }
 
     function sendWhatsApp() {
-        const n = document.getElementById('user-name').value || "Anonimo";
-        const text = `*HARDWARE CAOS*%0A*Tecnico:* ${n}%0A*Nota:* ${score}/25%0A*HP:* ${hp}`;
+        const name = document.getElementById('user-name').value || "Tecnico_Anonimo";
+        const result = score >= 18 ? "APROBADO" : "REPROBADO";
+        const text = `*EXAMEN HARDWARE*%0A*Alumno:* ${name}%0A*Nota:* ${score}/25%0A*Vida:* ${hp}%0A*Estado:* ${result}`;
         window.open(`https://wa.me/543816490060?text=${text}`);
     }
 </script>
