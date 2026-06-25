@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SISTEMA HARDWARE - PROTOCOLO CAOS FINAL</title>
+    <title>SISTEMA HARDWARE - PROTOCOLO FINAL</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
@@ -27,7 +27,6 @@
             display: flex; justify-content: center;
         }
 
-        /* EFECTOS DE CAOS */
         @keyframes shake {
             0% { transform: translate(1px, 1px); }
             20% { transform: translate(-3px, 0px); }
@@ -93,11 +92,9 @@
             z-index: 100; padding: 20px; text-align: center;
         }
 
-        /* FEEDBACK UI */
         .feedback-title { font-family: var(--pixel-font); font-size: 14px; margin-bottom: 20px; }
         .feedback-body { font-size: 0.9rem; line-height: 1.6; margin-bottom: 25px; color: #ccc; }
 
-        /* MINIGAMES */
         #dodge-field { width: 260px; height: 260px; border: 4px solid white; position: relative; overflow: hidden; background: #000; }
         #player-heart { width: 20px; height: 20px; position: absolute; color: red; font-size: 20px; z-index: 5; }
         .bullet { position: absolute; background: white; width: 10px; height: 10px; border-radius: 50%; }
@@ -108,7 +105,6 @@
 
         .timer-progress { width: 100%; height: 6px; background: #222; }
         #timer-fill { width: 100%; height: 100%; background: var(--orange); }
-
         #q-idx-label { font-family: var(--pixel-font); font-size: 7px; color: #666; margin-bottom: 10px; text-align: center; }
     </style>
 </head>
@@ -127,25 +123,22 @@
     </div>
 
     <div class="content-area" id="screen-main">
-        <!-- Inicio -->
         <div id="start-ui" style="text-align: center; margin-top: 30px;">
             <h1 style="font-family: var(--pixel-font); font-size: 14px; color: var(--orange); margin-bottom: 20px;">PROTOCOLO HARDWARE</h1>
             <p style="font-size: 10px; line-height: 1.8; margin-bottom: 25px;">
                 25 Preguntas Aleatorias.<br>
-                Feedback en tiempo real.<br>
+                Feedback técnico.<br>
                 Sobrevive con al menos 1 HP.
             </p>
             <button class="option-btn" onclick="startGame()" style="text-align: center;">[ INICIAR REVISIÓN ]</button>
         </div>
 
-        <!-- Quiz -->
         <div id="quiz-ui" style="display: none;">
             <div id="q-idx-label">PREGUNTA 00/25</div>
             <div id="q-txt" class="q-text"></div>
             <div id="q-options"></div>
         </div>
 
-        <!-- Resultados -->
         <div id="result-ui" style="display: none; text-align: center;">
             <h2 id="final-status" style="font-family: var(--pixel-font); font-size: 12px;"></h2>
             <div id="final-stats" style="font-family: var(--pixel-font); font-size: 8px; margin: 20px 0; line-height: 1.8;"></div>
@@ -154,14 +147,12 @@
         </div>
     </div>
 
-    <!-- Feedback Overlay -->
     <div id="feedback-overlay" class="overlay">
         <h2 id="fb-title" class="feedback-title"></h2>
         <p id="fb-body" class="feedback-body"></p>
         <button class="option-btn" onclick="closeFeedback()" style="text-align: center;">[ CONTINUAR ]</button>
     </div>
 
-    <!-- Mini-Game Overlay -->
     <div id="game-overlay" class="overlay">
         <div id="diff-tag" style="font-family: var(--pixel-font); font-size: 7px; color: yellow; margin-bottom: 10px;">DIFICULTAD: NORMAL</div>
         <div id="game-box"></div>
@@ -169,33 +160,32 @@
 </div>
 
 <script>
-    // Base de datos de preguntas basada en el PDF
     const baseQuestions = [
-        { q: "¿Cuál es el componente principal del filtrado transitorio?", o: ["Varistor", "Diodo", "Transformador", "Transistor"], a: "Varistor", e: "El varistor se encarga de cortar los picos de tensión recibidos desde el suministro eléctrico." },
+        { q: "¿Componente del filtrado transitorio que corta picos?", o: ["Varistor", "Diodo", "Transformador", "Transistor"], a: "Varistor", e: "El varistor se encarga de cortar los picos de tensión recibidos desde el suministro eléctrico." },
         { q: "¿Qué etapa transforma la corriente alterna (CA) en continua (CC)?", o: ["Rectificación", "Conmutación", "Filtrado Transitorio", "Regulación"], a: "Rectificación", e: "La rectificación utiliza diodos para transformar la onda sinusoidal en una línea recta." },
-        { q: "¿Qué componente evita que la interferencia de la fuente pase a la red eléctrica?", o: ["Filtrado Transitorio", "Multiplicador", "Salidas de 12V", "Inversores"], a: "Filtrado Transitorio", e: "Esta etapa evita la interferencia electromagnética hacia la red eléctrica." },
+        { q: "¿Qué evita que la interferencia electromagnética pase a la red?", o: ["Filtrado Transitorio", "Multiplicador", "Salidas de 12V", "Inversores"], a: "Filtrado Transitorio", e: "Esta etapa evita la interferencia electromagnética hacia la red eléctrica." },
         { q: "¿Para qué sirve el Termistor en la fuente?", o: ["Evita daños por grandes consumos", "Aumenta la frecuencia", "Regula los 12V", "Filtra los 5V"], a: "Evita daños por grandes consumos", e: "Es una resistencia variable que impide que picos de consumo dañen componentes internos." },
         { q: "¿Qué sucede si seleccionamos 110V en un país con 220V?", o: ["Se quema la fuente", "Funciona más rápido", "Se activa el modo ahorro", "No enciende"], a: "Se quema la fuente", e: "El multiplicador de tensión llevaría el voltaje a niveles que los capacitores no soportan." },
-        { q: "¿Cuál es el rango de frecuencia de una fuente conmutada?", o: ["10 KHz a 1 MHz", "50 a 60 Hz", "1 a 10 Hz", "Solo 220V"], a: "10 KHz a 1 MHz", e: "Las fuentes conmutadas elevan la frecuencia de red a valores mucho más altos para eficiencia." },
-        { q: "¿Qué línea de tensión es vital para CPUs y GPUs modernas?", o: ["+12 V", "+5 V", "+3.3 V", "-5 V"], a: "+12 V", e: "La línea de +12V es la más importante y la que soporta la mayor carga de energía." },
-        { q: "¿Qué significa +5vSB?", o: ["Línea Stand-By", "Super Boost", "Serial Bus", "Salida Secundaria"], a: "Línea Stand-By", e: "Es una línea que siempre está activa, permitiendo encender la PC por teclado o Wake-on-LAN." },
+        { q: "¿Rango de frecuencia típico de fuente conmutada?", o: ["10 KHz a 1 MHz", "50 a 60 Hz", "1 a 10 Hz", "Solo 220V"], a: "10 KHz a 1 MHz", e: "Las fuentes conmutadas elevan la frecuencia de red a valores mucho más altos para eficiencia." },
+        { q: "¿Línea de tensión vital para CPUs y GPUs modernas?", o: ["+12 V", "+5 V", "+3.3 V", "-5 V"], a: "+12 V", e: "La línea de +12V es la más importante y la que soporta la mayor carga de energía." },
+        { q: "¿Qué significa +5vSB?", o: ["Línea Stand-By", "Super Boost", "Serial Bus", "Salida Secundaria"], a: "Línea Stand-By", e: "Permite encender la PC por teclado o Wake-on-LAN estando 'apagada'." },
         { q: "¿Cuál es la función del circuito APFC?", o: ["Corregir el factor de potencia", "Enfriar la fuente", "Multiplicar los 220V", "Proteger contra agua"], a: "Corregir el factor de potencia", e: "El APFC reduce la potencia reactiva, mejorando la eficiencia energética." },
         { q: "¿Qué componente acumula energía en campo magnético?", o: ["Inductor (Bobina)", "Capacitor", "Resistor", "Fusible"], a: "Inductor (Bobina)", e: "Los inductores o bobinas acumulan energía en forma de campo magnético." },
-        { q: "¿Cómo se llama el conector de 24 pines?", o: ["ATX Power", "EPS", "PCI-Express", "Molex"], a: "ATX Power", e: "Es el conector principal que da energía a la motherboard, memoria y buses." },
-        { q: "En certificación 80 Plus, ¿qué nivel es mejor que Gold?", o: ["Platinum", "Silver", "White", "Bronze"], a: "Platinum", e: "El orden de eficiencia es White, Bronze, Silver, Gold, Platinum y Titanium." },
+        { q: "¿Cómo se llama el conector de 24 pines?", o: ["ATX Power", "EPS", "PCI-Express", "Molex"], a: "ATX Power", e: "Es el conector principal que da energía a la motherboard y sus buses." },
+        { q: "En certificación 80 Plus, ¿qué nivel es mejor que Gold?", o: ["Platinum", "Silver", "White", "Bronze"], a: "Platinum", e: "El orden es White, Bronze, Silver, Gold, Platinum y Titanium." },
         { q: "¿Cuál es la fórmula para calcular Potencia (Watts)?", o: ["Watts = Volts x Amperes", "Watts = Volts / Amperes", "Watts = Amperes + Volts", "Watts = Volts x 220"], a: "Watts = Volts x Amperes", e: "La potencia consumida es el producto de la tensión por la intensidad." },
-        { q: "¿Qué etapa separa físicamente la zona primaria de la secundaria?", o: ["Transformación", "Rectificación", "Entrada de Red", "Filtro de Salida"], a: "Transformación", e: "El transformador separa por inducción electromagnética el alto voltaje del bajo voltaje." },
-        { q: "¿Qué material de gabinete se recomienda con grosor mín. de 0,6mm?", o: ["Acero SECC", "Plástico ABS", "Acrílico", "Aluminio"], a: "Acero SECC", e: "El acero electrogalvanizado de 0,6mm garantiza dureza para soportar el manejo." },
-        { q: "¿Cuál es el tamaño de gabinete estándar?", o: ["Mid Tower", "Full Tower", "Slim SFF", "CaseMOD"], a: "Mid Tower", e: "La Mid Tower (Torre Media) es el estándar más utilizado para la mayoría de los usuarios." },
-        { q: "¿Dónde es ideal ubicar la fuente en el gabinete?", o: ["En la parte inferior", "En la parte superior", "Al frente", "Afuera"], a: "En la parte inferior", e: "Abajo permite una mejor refrigeración independiente para la fuente y el sistema." },
-        { q: "¿Para qué sirven las bahías de 2.5 pulgadas?", o: ["Discos SSD", "Lectores de DVD", "Discos Mecánicos", "Disqueteras"], a: "Discos SSD", e: "Las bahías de 2.5 son el estándar para los discos de estado sólido actuales." },
-        { q: "¿Qué señal indica que la fuente está lista (Power Good)?", o: ["PWR-OK", "PS-ON", "5vSB", "COM"], a: "PWR-OK", e: "La línea PWR-OK comunica a la motherboard que la fuente está bien para ser usada." },
-        { q: "¿Qué componente dificulta el paso de la corriente?", o: ["Resistor", "Diodo", "Capacitor", "Fusible"], a: "Resistor", e: "Los resistores (o resistencias) dificultan el paso de la corriente entre sus bornes." },
-        { q: "¿Cuántos ventiladores mínimos se recomiendan?", o: ["Dos (Entrada y Salida)", "Ninguno", "Uno (Atrás)", "Seis"], a: "Dos (Entrada y Salida)", e: "Lo ideal es uno metiendo aire frontal y otro sacando aire por la parte trasera." },
-        { q: "¿Qué eficiencia mínima requiere el estándar hoy?", o: ["70%", "50%", "90%", "100%"], a: "70%", e: "El estándar requiere al menos un 70% de eficiencia para no desperdiciar energía en calor." },
-        { q: "¿Para qué sirven los filtros anti-polvo?", o: ["Evitar entrada de suciedad e insectos", "Bajar el ruido", "Aumentar los FPS", "Adorno"], a: "Evitar entrada de suciedad e insectos", e: "Evitan que los componentes se dañen por suciedad acumulada." },
-        { q: "¿Qué unidad mide la intensidad de corriente?", o: ["Amperio", "Voltio", "Watt", "Ohmio"], a: "Amperio", e: "El Amper representa la intensidad con la que fluye la electricidad en un circuito." },
-        { q: "¿Qué componente protege ante sobretensiones cortándose?", o: ["Fusible", "Inductor", "Transistor", "Transformador"], a: "Fusible", e: "El fusible protege la fuente cortándose automáticamente ante una sobretensión." }
+        { q: "¿Qué etapa separa físicamente la zona primaria de la secundaria?", o: ["Transformación", "Rectificación", "Entrada de Red", "Filtro de Salida"], a: "Transformación", e: "El transformador separa por inducción electromagnética el alto voltaje del bajo." },
+        { q: "¿Material recomendado de gabinete con grosor mín. 0,6mm?", o: ["Acero SECC", "Plástico ABS", "Acrílico", "Aluminio"], a: "Acero SECC", e: "El acero electrogalvanizado de 0,6mm garantiza dureza estructural." },
+        { q: "¿Cuál es el tamaño de gabinete estándar?", o: ["Mid Tower", "Full Tower", "Slim SFF", "CaseMOD"], a: "Mid Tower", e: "La Mid Tower (Torre Media) es el estándar más utilizado." },
+        { q: "¿Dónde es ideal ubicar la fuente en el gabinete?", o: ["En la parte inferior", "En la parte superior", "Al frente", "Afuera"], a: "En la parte inferior", e: "Permite una mejor refrigeración independiente para la fuente." },
+        { q: "¿Para qué sirven las bahías de 2.5 pulgadas?", o: ["Discos SSD", "Lectores de DVD", "Discos Mecánicos", "Disqueteras"], a: "Discos SSD", e: "Las bahías de 2.5 son el estándar para los discos de estado sólido." },
+        { q: "¿Señal que indica que la fuente está lista?", o: ["PWR-OK", "PS-ON", "5vSB", "COM"], a: "PWR-OK", e: "Comunica a la motherboard que la fuente está operando correctamente." },
+        { q: "¿Componente que dificulta el paso de la corriente?", o: ["Resistor", "Diodo", "Capacitor", "Fusible"], a: "Resistor", e: "Los resistores dificultan el paso de la corriente entre sus bornes." },
+        { q: "¿Ventiladores mínimos recomendados?", o: ["Dos (Entrada y Salida)", "Ninguno", "Uno (Atrás)", "Seis"], a: "Dos (Entrada y Salida)", e: "Lo ideal es uno metiendo aire frontal y otro sacando aire por detrás." },
+        { q: "¿Eficiencia mínima que suele requerir el estándar?", o: ["70%", "50%", "90%", "100%"], a: "70%", e: "El estándar requiere al menos un 70% de eficiencia para reducir calor." },
+        { q: "¿Función principal de los filtros anti-polvo?", o: ["Evitar suciedad e insectos", "Bajar el ruido", "Aumentar FPS", "Adorno"], a: "Evitar suciedad e insectos", e: "Evitan que los componentes se dañen por suciedad acumulada." },
+        { q: "¿Qué unidad mide la intensidad de corriente?", o: ["Amperio", "Voltio", "Watt", "Ohmio"], a: "Amperio", e: "El Amper representa la intensidad con la que fluye la electricidad." },
+        { q: "¿Qué componente protege ante sobretensiones cortándose?", o: ["Fusible", "Inductor", "Transistor", "Transformador"], a: "Fusible", e: "El fusible protege la fuente fundiéndose ante una sobretensión." }
     ];
 
     let shuffledQuestions = [];
@@ -208,7 +198,6 @@
     let active = false;
     let miniGameStartTime = 0;
 
-    // Función para mezclar arrays (Fisher-Yates)
     function shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -218,16 +207,15 @@
     }
 
     function startGame() {
-        // Mezclar preguntas y luego mezclar opciones de cada pregunta
-        shuffledQuestions = shuffle([...baseQuestions]).map(q => {
-            return { ...q, o: shuffle([...q.o]) };
-        });
-
+        shuffledQuestions = shuffle([...baseQuestions]).map(q => ({
+            ...q, o: shuffle([...q.o])
+        }));
         document.getElementById('start-ui').style.display = 'none';
         document.getElementById('quiz-ui').style.display = 'block';
         updateHP();
         loadQuestion();
         active = true;
+        if (timerId) clearInterval(timerId);
         timerId = setInterval(tick, 100);
     }
 
@@ -235,7 +223,7 @@
         if (!active) return;
         timeLeft -= 0.1;
         if (timeLeft <= 0) {
-            damage(2, "¡DEMASIADO LENTO!");
+            damage(2, "¡LENTO!");
             nextQuestion();
         }
         document.getElementById('time-left').innerText = Math.ceil(timeLeft);
@@ -244,17 +232,14 @@
 
     function loadQuestion() {
         if (currentIdx >= shuffledQuestions.length) return finish();
-        
         timeLeft = 35 - penalty;
         if (timeLeft < 5) timeLeft = 5;
         penalty = 0;
-
         const q = shuffledQuestions[currentIdx];
         document.getElementById('q-idx-label').innerText = `PREGUNTA ${currentIdx + 1}/25`;
         document.getElementById('q-txt').innerText = q.q;
         const opts = document.getElementById('q-options');
         opts.innerHTML = '';
-        
         q.o.forEach((opt) => {
             const b = document.createElement('button');
             b.className = 'option-btn';
@@ -266,17 +251,13 @@
 
     function checkAnswer(selected) {
         const q = shuffledQuestions[currentIdx];
-        active = false; // Pausar timer
-
+        active = false;
         if (selected === q.a) {
             score++;
-            if (Math.random() > 0.6) {
-                launchBattle();
-            } else {
-                nextQuestion();
-            }
+            if (Math.random() > 0.6) launchBattle();
+            else nextQuestion();
         } else {
-            damage(1, "¡ERROR DE DATOS!");
+            damage(1, "¡ERROR!");
             showFeedback(q);
         }
     }
@@ -284,7 +265,7 @@
     function showFeedback(q) {
         const fb = document.getElementById('feedback-overlay');
         document.getElementById('fb-title').innerText = "¡ERROR CRÍTICO!";
-        document.getElementById('fb-title').style.color = "red";
+        document.getElementById('fb-title').style.color = "#ff0033";
         document.getElementById('fb-body').innerText = q.e;
         fb.style.display = 'flex';
     }
@@ -301,7 +282,7 @@
         document.getElementById('game-viewport').classList.add('shake');
         setTimeout(() => document.getElementById('game-viewport').classList.remove('shake'), 300);
         if (hp <= 0) {
-            alert("INTEGRIDAD DEL SISTEMA: 0%. REINICIANDO...");
+            alert("INTEGRIDAD 0%. REINICIANDO...");
             location.reload();
         }
     }
@@ -316,22 +297,16 @@
         loadQuestion();
     }
 
-    // --- SISTEMA DE BATALLA ---
     function launchBattle() {
         miniGameStartTime = Date.now();
         const diff = currentIdx < 8 ? 1 : (currentIdx < 16 ? 2 : 3);
         const overlay = document.getElementById('game-overlay');
         overlay.style.display = 'flex';
-        
         const container = document.getElementById('game-box');
         container.innerHTML = '';
-        
         const games = ['DODGE', 'TATETI', 'MASH'];
         const game = games[Math.floor(Math.random() * (currentIdx < 10 ? 2 : 3))];
-
         document.getElementById('diff-tag').innerText = "DIFICULTAD: " + (diff==1?"FÁCIL":diff==2?"NORMAL":"CAOS");
-        document.getElementById('boss-talk').innerText = "TE COSTARÁ TIEMPO. JAJAJA";
-
         if (game === 'DODGE') startDodge(container, diff);
         else if (game === 'TATETI') startTateti(container, diff);
         else startMash(container, diff);
@@ -341,11 +316,9 @@
         penalty = Math.floor((Date.now() - miniGameStartTime) / 1000);
         document.getElementById('game-overlay').style.display = 'none';
         if (!win) damage(1, "¡DÉBIL!");
-        else document.getElementById('boss-talk').innerText = "Tks... solo suerte.";
+        else document.getElementById('boss-talk').innerText = "Tks...";
         nextQuestion();
     }
-
-    // --- MINIJUEGOS ---
 
     function startDodge(container, diff) {
         const field = document.createElement('div'); field.id = 'dodge-field';
@@ -414,24 +387,21 @@
     }
 
     function finish() {
-        active = false; clearInterval(timerId);
+        active = false;
+        clearInterval(timerId);
         document.getElementById('quiz-ui').style.display = 'none';
         document.getElementById('result-ui').style.display = 'block';
-        const win = score >= 18; // Aproximadamente 72%
+        const win = score >= 18;
         const status = document.getElementById('final-status');
         status.innerText = win ? "SISTEMA ESTABLE (APROBADO)" : "SISTEMA CORRUPTO (REPROBADO)";
-        status.style.color = win ? var(--correct) : var(--danger);
-        document.getElementById('final-stats').innerHTML = `
-            ACIERTOS: ${score}/25<br>
-            HP FINAL: ${hp}/10<br>
-            INTEGRIDAD: ${win ? 'ÓPTIMA' : 'FALLIDA'}
-        `;
+        status.style.color = win ? "#00ff00" : "#ff0033";
+        document.getElementById('final-stats').innerHTML = `ACIERTOS: ${score}/25<br>HP FINAL: ${hp}/10`;
     }
 
     function sendWhatsApp() {
-        const name = document.getElementById('user-name').value || "Tecnico_Anonimo";
-        const result = score >= 18 ? "APROBADO" : "REPROBADO";
-        const text = `*EXAMEN HARDWARE*%0A*Alumno:* ${name}%0A*Nota:* ${score}/25%0A*Vida:* ${hp}%0A*Estado:* ${result}`;
+        const name = document.getElementById('user-name').value || "Anonimo";
+        const res = score >= 18 ? "APROBADO" : "REPROBADO";
+        const text = `*EXAMEN HARDWARE*%0A*Alumno:* ${name}%0A*Nota:* ${score}/25%0A*Vida:* ${hp}%0A*Estado:* ${res}`;
         window.open(`https://wa.me/543816490060?text=${text}`);
     }
 </script>
